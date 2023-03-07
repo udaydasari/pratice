@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:mvc="http://www.springframework.org/schema/mvc"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xsi:schemaLocation="
+        http://www.springframework.org/schema/beans    
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <!-- Package Scanning for COntrollers -->
+    <context:component-scan base-package="com.eventmanagement"/>
+    <!-- Adding the Support forAnnotation Driven Controllers -->
+    
+    <mvc:annotation-driven />
+    
+    <!-- Configuring ViewResolver for the exact location of view page -->
+    <bean id="ViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+         <property name="prefix">
+             <value>/WEB-INF/view/</value>
+         </property>
+         <property name="suffix">
+             <value>.jsp</value>
+         </property>
+     </bean>
+    
+    <!-- All below are the entries added for Spring-Hibernate Integration -->     
+   
+    <!-- Defining the dataSource where we are specifying Database Connection Information -->
+    <bean id="myDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  destroy-method="close">
+         <property name="driverClass" value="com.mysql.cj.jdbc.Driver"/>
+         <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/sampleDB?useSSL=false"/>
+         <property name="user" value="root"/>
+         <property name="password" value="mphasis123"/>
+         
+         <!-- Following are the Connection Pool Properties -->
+         <property name="minPoolSize" value="1"/>
+         <property name="maxPoolSize" value="20"/>
+       
+    </bean>
+   
+    <!-- Setting up the Hibernate Session Factory -->   
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="packagesToScan" value="com.eventmanagement.entity"/>
+        
+        <property name="hibernateProperties">
+             <props>
+                  <!-- Hibernate Dialect will provide Database specific Information -->
+                  <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                  <prop key="hybernate.show_sql">true</prop>
+             </props>
+        </property>
+    </bean>
+    
+    <!-- Setting up the Hibernate Transaction Manager -->
+    <bean id="myTransactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+     
+         <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+     <!-- To enable the usage of the annotation for transaction management @Transactional -->
+     <tx:annotation-driven transaction-manager="myTransactionManager"/>    
+   
+ </beans>
